@@ -1,0 +1,9 @@
+# Allow all bots to crawl public pages
+User-agent: *
+Disallow: /admin
+Disallow: /login
+Disallow: /api
+Allow: /
+
+# Optional: Link to your sitemap (if you have one)
+# Sitemap: https://yourdomain.com/sitemap.xml
