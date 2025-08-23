@@ -270,6 +270,8 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
           <div className="pc-glare" />
           <div className="pc-content pc-avatar-content">
             <Image
+             height={600}
+             width={600}
               className="avatar"
               src={avatarUrl}
               alt={`${name || "User"} avatar`}
@@ -284,6 +286,8 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                 <div className="pc-user-details">
                   <div className="pc-mini-avatar">
                     <Image
+                    height={600}
+                    width={600}
                       src={miniAvatarUrl || avatarUrl}
                       alt={`${name || "User"} mini avatar`}
                       loading="lazy"
