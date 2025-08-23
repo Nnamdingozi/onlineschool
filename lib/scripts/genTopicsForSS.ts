@@ -78,11 +78,12 @@ async function generateTopicsOnceforss() {
 
       for (const term of terms) {
         // 🔹 Skip English except SS3 Third Term
+        const termName = term.name ?? "unknown"
         if (
           subjectName.toLowerCase() === "english" &&
           !(
             gradeName === "ss3" &&
-            term.name.toLowerCase().includes("third")
+            termName.toLowerCase().includes("third")
           )
         ) {
           console.log(`⏭ Skipping English for ${gradeName} - ${term.name}`);
