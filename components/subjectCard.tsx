@@ -21,10 +21,10 @@ export default function SubjectCards({ subjects, handleSubjectClick }: SubjectCa
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {subjects.map(subject => {
         // ✅ Declare constants inside the map function body
-        const progress = subject.progress ?? Math.floor(Math.random() * 100);
-        const topics = subject.topics ?? Math.floor(Math.random() * 10);
+        const progress = Math.floor(Math.random() * 100);   //subject.progress ?? 
+        const topics = Math.floor(Math.random() * 10);      // subject.topics ??
         const color = getSubjectColor(subject.name ?? 'unknown')
-        const description = subject.description ?? "This will be fixed later";
+        const description =  "This will be fixed later";  //subject.description ??
 
         return (
           <Card
