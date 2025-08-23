@@ -41,8 +41,9 @@ import React, {
     )
   );
   Card.displayName = "Card";
+
+  type CardRef = RefObject<HTMLDivElement | null>;
   
-  type CardRef = RefObject<HTMLDivElement>;
   interface Slot {
     x: number;
     y: number;
@@ -120,7 +121,8 @@ import React, {
     );
   
     const tlRef = useRef<gsap.core.Timeline | null>(null);
-    const intervalRef = useRef<number>();
+    const intervalRef = useRef<number>(0);
+    
     const container = useRef<HTMLDivElement>(null);
   
     useEffect(() => {
