@@ -67,7 +67,9 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected/class`,
+          // emailRedirectTo: `${window.location.origin}/protected/class`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/protected/class`
+
           // emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/protected/class`,
         },
       });
