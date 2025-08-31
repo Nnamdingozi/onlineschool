@@ -95,17 +95,17 @@ async function generateTopicsOnce() {
         });
 
 
-        
+
         const text = aiResponse.text || "No content generated.";
 
-// remove extra texts markdowns etc to ensure clean json
+        // remove extra texts markdowns etc to ensure clean json
         function cleanGeminiJSON(raw: string) {
           return raw
             .replace(/```json/g, '')
             .replace(/```/g, '')
             .trim();
         }
-        
+
         const cleaned = cleanGeminiJSON(text);
 
         let topics: string[];

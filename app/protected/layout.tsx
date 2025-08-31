@@ -14,7 +14,6 @@ export default function ProtectedLayout({
         <div className="flex-1 flex flex-col gap-20 max-w-7xl p-5 h-auto w-full">
           {children}
         </div>
-  ñ
       </div>
     </main>
   );

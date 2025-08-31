@@ -3,7 +3,6 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Link from "next/link";
-import { DeployButton } from "@/components/deploy-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
@@ -44,8 +43,6 @@ export default function RootLayout({
           <div className="flex gap-5 items-center font-semibold">
             <Link href={"/"}>ClassBridge</Link>
             <div className="flex items-center gap-2">
-              <DeployButton />
-
             </div>
 
           </div>
