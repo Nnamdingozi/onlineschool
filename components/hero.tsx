@@ -91,31 +91,80 @@
 
 
 
-import ShinyText from '@/components/reactbitstyles/textstyle'
+// import ShinyText from '@/components/reactbitstyles/textstyle'
 
 
 
 
 
+
+// export function Hero() {
+//   return (
+    
+// <div className="flex flex-row items-start justify-between gap-10 px-4 border-2  max-h-screen  w-full  border-purple-500/30 rounded-xl bg-white dark:backdrop-blur-md dark:bg-white/10 shadow-xl mt-32 h-48 ">
+//   {/* Left Side: Text Content */}
+//   <div className="border-2 border-green-400 w-[65%] h-auto my-auto rounded-md shadow-2xl p-4">
+//   <ShinyText text="Welcome to ClassBridge" disabled={false} speed={3} className='custom-class text-5xl' />
+//     <p className="text-lg text-muted-foreground mt-7 text-black">
+//       Choose your class and explore interactive lessons tailored for JS1 to SS3.
+//     </p>
+//   </div>
+
+//   {/* Right Side: Card Swap or Cards Grid */}
+
+    
+
+
+
+// </div>
+//   )
+// }
+
+// import ShinyText from '@/components/reactbitstyles/textstyle';
+
+// export function Hero() {
+//   return (
+//     <div className="flex flex-col md:flex-row items-start justify-between gap-6 md:gap-10 px-4 border-2 max-h-screen w-full border-purple-500/30 rounded-xl bg-white dark:backdrop-blur-md dark:bg-white/10 shadow-xl mt-20 md:mt-32 p-4">
+//       {/* Left Side: Text Content */}
+//       <div className="border-2 border-green-400 w-full md:w-[65%] h-auto my-auto rounded-md shadow-2xl p-4">
+//         <ShinyText
+//           text="Welcome to ClassBridge"
+//           disabled={false}
+//           speed={3}
+//           className="custom-class text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+//         />
+//         <p className="text-sm sm:text-base  text-muted-foreground mt-5 text-black">
+//           Choose your class and explore interactive lessons tailored for JS1 to SS3.
+//         </p>
+//       </div>
+
+//       {/* Right Side: Placeholder for future Cards/Content */}
+//       <div className="w-full md:w-[35%] border-2 border-dashed border-gray-300 h-32 md:h-auto rounded-md flex items-center justify-center text-gray-400">
+//         {/* Example placeholder */}
+//         <span className="text-xs sm:text-sm md:text-base">Card Section</span>
+//       </div>
+//     </div>
+//   );
+// }
+
+import ShinyText from '@/components/reactbitstyles/textstyle';
 
 export function Hero() {
   return (
-    
-<div className="flex flex-row items-start justify-between gap-10 px-4 border-2  max-h-screen  w-full  border-purple-500/30 rounded-xl bg-white dark:backdrop-blur-md dark:bg-white/10 shadow-xl mt-32 h-48 ">
-  {/* Left Side: Text Content */}
-  <div className="border-2 border-green-400 w-[65%] h-auto my-auto rounded-md shadow-2xl p-4">
-  <ShinyText text="Welcome to ClassBridge" disabled={false} speed={3} className='custom-class text-5xl' />
-    <p className="text-lg text-muted-foreground mt-7 text-black">
-      Choose your class and explore interactive lessons tailored for JS1 to SS3.
-    </p>
-  </div>
-
-  {/* Right Side: Card Swap or Cards Grid */}
-
-    
-
-
-
-</div>
-  )
+    <div className="flex flex-col md:flex-row items-start justify-between gap-6 md:gap-10 px-4 border-2 max-h-screen w-full border-purple-500/30 rounded-xl bg-white dark:backdrop-blur-md dark:bg-white/10 shadow-xl mt-20 md:mt-32 p-4">
+      {/* Left Side: Text Content */}
+      <div className="border-2 border-green-400 w-full md:w-[65%] lg:w-full h-auto my-auto rounded-md shadow-2xl p-4">
+        <ShinyText
+          text="Welcome to ClassBridge"
+          disabled={false}
+          speed={3}
+          className="custom-class text-2xl sm:text-3xl sm:w-full md:text-4xl md:w-1/2 lg:text-5xl"
+        />
+        <p className="text-sm sm:text-base  text-muted-foreground text-black w-full md:w-1/2">
+          Choose your class and explore interactive lessons tailored for JS1 to SS3.
+        </p>
+      </div>
+      
+    </div>
+  );
 }

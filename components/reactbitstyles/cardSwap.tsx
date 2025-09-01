@@ -226,7 +226,7 @@ import React, {
         ? cloneElement(child, {
             key: i,
             ref: refs[i],
-            style: { width, height, ...(child.props.style ?? {}) },
+            // style: { width, height, ...(child.props.style ?? {}) },
             onClick: (e) => {
               child.props.onClick?.(e as React.MouseEvent<HTMLDivElement>);
               onCardClick?.(i);
@@ -238,7 +238,7 @@ import React, {
     return (
       <div
         ref={container}
-        className="absolute top-20 right-36 transform translate-x-[5%] translate-y-[20%] origin-bottom-right perspective-[900px] overflow-visible max-[768px]:translate-x-[25%] max-[768px]:translate-y-[25%] max-[768px]:scale-[0.75] max-[480px]:translate-x-[25%] max-[480px]:translate-y-[25%] max-[480px]:scale-[0.55]"
+        className="absolute top-[4%] right-[20%] md:right-[15%] transform translate-x-[5%] translate-y-[20%] origin-bottom-right perspective-[900px] overflow-visible max-[768px]:translate-x-[25%] max-[768px]:translate-y-[25%] max-[768px]:scale-[0.75] max-[480px]:translate-x-[25%] max-[480px]:translate-y-[25%] max-[480px]:scale-[0.55]"
         style={{ width, height }}
       >
         {rendered}
