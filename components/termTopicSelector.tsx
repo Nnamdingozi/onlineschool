@@ -55,9 +55,9 @@ const [quizError, setQuizError] = useState<string | null>(null);
       return;
     }
 
-    const formattedTerm =
-      selectedTerm.name?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
-      "Selected Term";
+    // const formattedTerm =
+    //   selectedTerm.name?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
+    //   "Selected Term";
 
     setNoteLoading(true);
     setNoteError(null);
@@ -115,9 +115,9 @@ const [quizError, setQuizError] = useState<string | null>(null);
       return;
     }
 
-    const formattedTerm =
-      selectedTerm.name?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
-      "Selected Term";
+    // const formattedTerm =
+    //   selectedTerm.name?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ||
+    //   "Selected Term";
 
       setQuizLoading(true);
       setQuizError(null);

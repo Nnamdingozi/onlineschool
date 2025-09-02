@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
       quizData = JSON.parse(cleaned);
     } catch (err) {
-      console.error("Failed to parse AI response:", rawText);
+      console.error("Failed to parse AI response:", err);
       return NextResponse.json(
         { error: "Invalid JSON from AI", details: rawText },
         { status: 500 }
