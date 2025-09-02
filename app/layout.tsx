@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import Link from "next/link";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { hasEnvVars } from "@/lib/utils";
+import Image from "next/image";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -38,35 +38,37 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-                <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-        <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-          <div className="flex gap-5 items-center font-semibold">
-            <Link href={"/"}>ClassBridge</Link>
-            <div className="flex items-center gap-2">
-            </div>
+          <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
+            <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
+             <Image height={60} width={140} src={'/images/logo1.png'} alt="site logo" className="rounded"></Image>
+          
+              <div className="flex gap-5 items-center font-semibold">
+                {/* <Link href={"/"}>ClassBridge</Link> */}
+                <div className="flex items-center gap-2">
+                </div>
 
-          </div>
-          {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
-        </div>
-        <div className="flex items-center">
-          <ThemeSwitcher />
-        </div>
-      </nav>
+              </div>
+              {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+            </div>
+            <div className="flex items-center">
+              <ThemeSwitcher />
+            </div>
+          </nav>
           {children}
           <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://nnamdingozi.github.io/my-portfolio/"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Richambition
-            </a>
-          </p>
+            <p>
+              Powered by{" "}
+              <a
+                href="https://nnamdingozi.github.io/my-portfolio/"
+                target="_blank"
+                className="font-bold hover:underline"
+                rel="noreferrer"
+              >
+                Richambition
+              </a>
+            </p>
 
-        </footer>
+          </footer>
         </ThemeProvider>
       </body>
     </html>
