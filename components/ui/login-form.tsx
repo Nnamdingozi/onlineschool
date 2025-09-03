@@ -6,6 +6,9 @@ import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Eye, EyeOff } from "lucide-react";
+
+
 import {
   Card,
   CardContent,
@@ -21,6 +24,9 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+
   const supabase = createClient();
   const router = useRouter();
 
@@ -91,15 +97,37 @@ export default function LoginForm() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="password"
-                  type="password"
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
 
               {error && (
                 <p className="text-sm text-red-500">
