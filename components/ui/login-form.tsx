@@ -25,7 +25,7 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+
 
   const supabase = createClient();
   const router = useRouter();
