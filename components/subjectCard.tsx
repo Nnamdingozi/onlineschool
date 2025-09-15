@@ -32,7 +32,7 @@ export default function SubjectCards({ subjects, handleSubjectClick, progressDat
         const topicCount = topicCounts[subject.id] ?? 0;
 
         const color = getSubjectColor(subject.name ?? 'unknown');
-        const description = subject.description ?? "This will be fixed later";
+   
 
         return (
           <Card
@@ -56,9 +56,9 @@ export default function SubjectCards({ subjects, handleSubjectClick, progressDat
               <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
                 {subject.name}
               </h3>
-              <p className="text-muted-foreground mb-4 line-clamp-2">
+              {/* <p className="text-muted-foreground mb-4 line-clamp-2">
                 {description}
-              </p>
+              </p> */}
 
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
