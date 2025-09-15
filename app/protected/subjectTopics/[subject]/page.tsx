@@ -173,6 +173,8 @@ import { useRouter, useParams } from "next/navigation";
 import TermSelection from "@/components/termTopicSelector";
 import { Database } from "@/supabaseTypes";
 import { useEffect, useState, useMemo } from "react";
+import { getTopicsGroupedByTerm } from "@/lib/getTopicsGroupedByTerm";
+
 
 type Subject = Database['public']['Tables']['subjects']['Row'];
 type Term = Database['public']['Tables']['terms']['Row'];
@@ -186,6 +188,8 @@ export default function SubjectTopicsPage() {
   const [grade, setGrade] = useState<Grade | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string>('');
+
 
   const router = useRouter();
   const params = useParams();
@@ -211,6 +215,14 @@ export default function SubjectTopicsPage() {
 
         const { profile } = profileData;
         const gradeId = profile.grade_id;
+        const userId = profile.id
+
+        if (userId) {
+          setUserId(userId)
+
+          console.log('userId in termselectorpage:', userId)
+        }
+
 
         if (!gradeId) {
           setError("User grade not found.");
@@ -256,30 +268,39 @@ export default function SubjectTopicsPage() {
         }
         setTerms(termsData);
 
-        // 5️⃣ Fetch topics for this subject
-        const { data: topicsData, error: topicError } = await supabase
-          .from('topics')
-          .select('*')
-          .eq('subject_id', matchedSubject.id)
-          .eq('grade_id', gradeId); 
+        // // 5️⃣ Fetch topics for this subject
+        // const { data: topicsData, error: topicError } = await supabase
+        //   .from('topics')
+        //   .select('*')
+        //   .eq('subject_id', matchedSubject.id)
+        //   .eq('grade_id', gradeId)
+        //   .order('id', { ascending: true });
 
-        if (topicError || !topicsData) {
-          setError("Error loading topics.");
-          return;
-        }
 
-        const grouped: Record<number, { topics: Topic[]; count: number }> = {};
-        topicsData.forEach(topic => {
-          if (topic.term_id != null) {
-            if (!grouped[topic.term_id]) {
-              grouped[topic.term_id] = { topics: [], count: 0 };
-            }
-            grouped[topic.term_id].topics.push(topic);
-            grouped[topic.term_id].count++;
-          }
-        });
+        // if (topicError || !topicsData) {
+        //   setError("Error loading topics.");
+        //   return;
+        // }
+
+        // const grouped: Record<number, { topics: Topic[]; count: number }> = {};
+        // topicsData.forEach(topic => {
+        //   if (topic.term_id != null) {
+        //     if (!grouped[topic.term_id]) {
+        //       grouped[topic.term_id] = { topics: [], count: 0 };
+        //     }
+        //     grouped[topic.term_id].topics.push(topic);
+        //     grouped[topic.term_id].count++;
+
+        //   }
+        // });
+
+        // setTopicsByTerm(grouped);
+
+
+        const { grouped } = await getTopicsGroupedByTerm(gradeId, matchedSubject.id);
 
         setTopicsByTerm(grouped);
+
       } catch (err) {
         console.error(err);
         setError("An unexpected error occurred.");
@@ -309,6 +330,7 @@ export default function SubjectTopicsPage() {
         terms={terms}
         topicsByTerm={topicsByTerm}
         gradeId={grade.id}
+        userId={userId}
       />
     </div>
   );

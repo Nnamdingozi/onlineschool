@@ -8,23 +8,31 @@ import { BookOpen, Clock, Users } from 'lucide-react';
 import { getSubjectColor } from '@/lib/subjectColourSelector';
 
 type Subject = Database['public']['Tables']['subjects']['Row'];
+type ProgressData = Database['public']['Tables']['student_subject_progress']['Row'];
 
 interface SubjectCardsProps {
   subjects: Subject[];
   handleSubjectClick: (subjectName: string) => void;
+  progressData: ProgressData[]; 
+  topicCounts: Record<number, number>;
 }
 
-export default function SubjectCards({ subjects, handleSubjectClick }: SubjectCardsProps) {
-
-
+export default function SubjectCards({ subjects, handleSubjectClick, progressData, topicCounts }: SubjectCardsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {subjects.map(subject => {
-        // ✅ Declare constants inside the map function body
-        const progress = Math.floor(Math.random() * 100);   //subject.progress ?? 
-        const topics = Math.floor(Math.random() * 10);      // subject.topics ??
-        const color = getSubjectColor(subject.name ?? 'unknown')
-        const description =  "This will be fixed later";  //subject.description ??
+        // ✅ find this subject's progress
+        const subjectProgress = progressData?.find(
+          (p) => p.subject_id === subject.id
+        );
+
+        const progress = subjectProgress?.progress_percentage ?? 0;
+        const topics = subjectProgress?.total_topics ?? 0;
+        const completedTopics = subjectProgress?.completed_topics ?? 0;
+        const topicCount = topicCounts[subject.id] ?? 0;
+
+        const color = getSubjectColor(subject.name ?? 'unknown');
+        const description = subject.description ?? "This will be fixed later";
 
         return (
           <Card
@@ -37,6 +45,7 @@ export default function SubjectCards({ subjects, handleSubjectClick }: SubjectCa
                   <BookOpen className="h-6 w-6 text-white" />
                 </div>
                 <div className="text-right">
+                <p className="text-sm text-muted-foreground">Total Topics: {topicCount}</p>
                   <p className="text-sm text-muted-foreground">Progress</p>
                   <p className="text-lg font-semibold text-primary">
                     {progress}%
@@ -55,7 +64,9 @@ export default function SubjectCards({ subjects, handleSubjectClick }: SubjectCa
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
-                    <span>{topics} topics</span>
+                    <span>
+                      {completedTopics}/{topics} topics
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
@@ -81,7 +92,7 @@ export default function SubjectCards({ subjects, handleSubjectClick }: SubjectCa
                 variant="default"
               >
                 Continue Learning
-              </Button >
+              </Button>
             </CardContent>
           </Card>
         );

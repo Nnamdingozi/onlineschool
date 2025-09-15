@@ -96,18 +96,7 @@ export default function LoginForm() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              
+          
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
