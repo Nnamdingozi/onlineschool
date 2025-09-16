@@ -228,10 +228,14 @@ export default function TermSelection({
       if (insertError) throw insertError;
 
       setQuiz(newQuiz);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error in fetchQuizForTopic:", err);
-      setQuizError(err.message || "An unexpected error occurred while fetching the quiz.");
-      setQuiz(null); // Ensure no stale data is shown
+
+      if (err instanceof Error) {
+        setQuizError(err.message);
+      } else {
+        setQuizError("An unexpected error occurred while fetching the quiz.");
+      }
     } finally {
       setQuizLoading(false);
     }
@@ -244,7 +248,7 @@ export default function TermSelection({
     if (selectedTopic && selectedTerm) {
       fetchQuizForTopic();
     }
-  }, [selectedTopic, selectedTerm, fetchQuizForTopic]);
+  }, [selectedTopic, selectedTerm, fetchQuizForTopic, subject.name]);
 
 
   // retry fetching quizz handler
