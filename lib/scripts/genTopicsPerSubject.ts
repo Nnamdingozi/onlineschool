@@ -1,22 +1,7 @@
 
 import 'dotenv/config';
-import { createClient } from '@supabase/supabase-js'
-import { Database } from '../../supabaseTypes';
+import { supabaseServer } from "@/lib/supabase/serverClient";
 import { GoogleGenAI } from "@google/genai";
-
-// type SubjectGrade = Database['public']['Tables']['subject_grades']['Row'];
-// type Subject = Database['public']['Tables']['subjects']['Row'];
-// type Grade = Database['public']['Tables']['grades']['Row'];
-// type Term = Database['public']['Tables']['terms']['Row'];
-
-console.log('SUPABASE_URL:', process.env.SUPABASE_URL)
-console.log('SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
-
-
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!
-)
 
 
 
@@ -27,7 +12,7 @@ const genAI = new GoogleGenAI({
 async function generateTopicsOnce() {
   try {
     // 1. Fetch subject-grade links
-    const { data: subjectGrades, error: sgError } = await supabase
+    const { data: subjectGrades, error: sgError } = await supabaseServer
       .from('subject_grades')
       .select('subject_id, grade_id');
     if (sgError) throw sgError;
@@ -35,7 +20,7 @@ async function generateTopicsOnce() {
 
 
     // 2. Fetch subjects
-    const { data: subjects, error: subjError } = await supabase
+    const { data: subjects, error: subjError } = await supabaseServer
       .from('subjects')
       .select('*');
     if (subjError) throw subjError;
@@ -44,14 +29,14 @@ async function generateTopicsOnce() {
 
 
     // 3. Fetch grades
-    const { data: grades, error: gradeError } = await supabase
+    const { data: grades, error: gradeError } = await supabaseServer
       .from('grades')
       .select('*');
     if (gradeError) throw gradeError;
     console.log("Fetched grades:", grades);
 
     // 4. Fetch terms
-    const { data: terms, error: termError } = await supabase
+    const { data: terms, error: termError } = await supabaseServer
       .from('terms')
       .select('*');
     if (termError) throw termError;
@@ -118,7 +103,7 @@ async function generateTopicsOnce() {
 
         // 8. Insert topics only if not already in DB
         for (const topic of topics) {
-          const { data: existing, error: checkError } = await supabase
+          const { data: existing, error: checkError } = await supabaseServer
             .from('topics')
             .select('id')
             .eq('subject_id', sg.subject_id)
@@ -134,7 +119,7 @@ async function generateTopicsOnce() {
             continue;
           }
 
-          await supabase.from('topics').insert({
+          await supabaseServer.from('topics').insert({
             subject_id: sg.subject_id,
             grade_id: sg.grade_id,
             term_id: term.id,
