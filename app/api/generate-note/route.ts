@@ -5,7 +5,7 @@ import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 
 const ai = new GoogleGenAI({
-  apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 // ✅ Mapping of Grades → Nigerian School Levels
@@ -50,11 +50,22 @@ export async function POST(req: Request) {
 
     const text = response.text || "No content generated.";
     return NextResponse.json({ note: text });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error generating note:", error);
+
+    // ✅  Use a type guard to determine what the error is.
+    let errorMessage = "An unexpected error occurred.";
+    let statusCode = 500;
+
+    // Check if it's an object with a 'message' property (like a standard Error)
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+
     return NextResponse.json(
-      { error: error.message || "Failed to generate note" },
-      { status: 500 }
+      { error: "Failed to generate note", details: errorMessage },
+      { status: statusCode }
     );
   }
 }

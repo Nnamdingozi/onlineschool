@@ -63,13 +63,13 @@ async function getQuiz(supabase: any, params: ContentRequestParams) {
     .eq("topic_id", params.topicId)
     .maybeSingle();
 
- // ✅ HARDENING: Validate the cached data.
+  // ✅ HARDENING: Validate the cached data.
   // If `content` exists AND it is a valid array, return it.
   if (existing?.content && Array.isArray(existing.content)) {
     console.log(`[API] Quiz Cache HIT and is valid for topicId: ${params.topicId}`);
     return existing.content;
   }
-  
+
   // If we reach here, it's a cache miss OR the cached data is invalid.
   // We will proceed to generate a new quiz.
   console.log(`[API] Quiz Cache MISS or invalid data for topicId: ${params.topicId}. Regenerating...`);
@@ -141,12 +141,25 @@ export async function POST(request: Request) {
     if (quizResult.status === "rejected")
       console.error("Quiz generation failed:", quizResult.reason);
 
+
     return NextResponse.json(responseData);
   } catch (error: any) {
     console.error("[API /topic-content] Error:", error);
+
+
+    let errorMessage = "An unexpected error occurred.";
+    let statusCode = 500;
+
+    // Check if it's an object with a 'message' property (like a standard Error)
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+
+
     return NextResponse.json(
-      { error: error.message || "An internal server error occurred." },
-      { status: 500 }
+      { error: "Failed to generate note", details: errorMessage },
+      { status: statusCode }
     );
   }
 }

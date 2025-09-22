@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   const { grade, term, subject, topic } = await req.json();
 
   // ✅ Translate grade into Nigerian school level
-    const mappedGrade = gradeMapping[grade] || grade;
+  const mappedGrade = gradeMapping[grade] || grade;
 
   const numQuestions = 10;
   const prompt = `
@@ -67,18 +67,43 @@ export async function POST(req: Request) {
       quizData = JSON.parse(cleaned);
     } catch (err) {
       console.error("Failed to parse AI response:", err);
+
+      // ✅  Use a type guard to determine what the error is.
+      let errorMessage = "An unexpected error occurred.";
+      let statusCode = 500;
+
+      // Check if it's an object with a 'message' property (like a standard Error)
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+
+
       return NextResponse.json(
-        { error: "Invalid JSON from AI", details: rawText },
-        { status: 500 }
+        { error: "Failed to generate note", details: errorMessage },
+        { status: statusCode }
       );
     }
+
 
     return NextResponse.json({ quiz: quizData.quiz || [] });
   } catch (error) {
     console.error("Quiz generation error:", error);
+
+
+    let errorMessage = "An unexpected error occurred.";
+    let statusCode = 500;
+
+    // Check if it's an object with a 'message' property (like a standard Error)
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+
+
     return NextResponse.json(
-      { error: "Failed to generate quiz" },
-      { status: 500 }
+      { error: "Failed to generate  quizz", details: errorMessage },
+      { status: statusCode }
     );
   }
 }

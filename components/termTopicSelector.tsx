@@ -429,7 +429,7 @@ export default function TermSelection({
               </Button>
               <Button onClick={handleBackToSubject} className="ml-9">Back To Subjects</Button>
            
-              {progressError && <p className="text-sm text-red-500 ml-4">Couldn't save progress.</p>}
+              {progressError && <p className="text-sm text-red-500 ml-4">Could not  save progress.</p>}
             </div>
 
           </div>

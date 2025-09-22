@@ -49,9 +49,22 @@ export async function POST(request: NextRequest) {
     console.log(`[API POST] Upsert successful for topic ${topicId}`);
     return NextResponse.json({ success: true, is_completed: true });
 
-  } catch (error: any) {
-    console.error("[API POST] Caught a fatal error:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+
+    let errorMessage = "An unexpected error occurred.";
+    let statusCode = 500;
+
+    // Check if it's an object with a 'message' property (like a standard Error)
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    console.error("[API POST] Caught a fatal error:", errorMessage);
+
+    return NextResponse.json(
+      { error: "Failed to generate  topic progress", details: errorMessage },
+      { status: statusCode }
+    );
   }
 }
 
@@ -63,6 +76,21 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     // ... rest of GET handler
-  } catch (error) { /* ... */ }
+  } catch (error) {
+    let errorMessage = "An unexpected error occurred.";
+    let statusCode = 500;
+
+    // Check if it's an object with a 'message' property (like a standard Error)
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    console.error("[API POST] Caught a fatal error:", errorMessage);
+
+    return NextResponse.json(
+      { error: "Failed to verify user", details: errorMessage },
+      { status: statusCode }
+    );
+  }
 }
 
