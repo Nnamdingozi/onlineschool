@@ -41,7 +41,7 @@ export default function SubjectTopicsPage() {
   return (
     <div className="p-4">
       <h1 className="text-white text-center text-5xl mb-5">
-        Welcome to {grade.name}
+        Welcome Back ! {grade.name} 
       </h1>
       <TermSelection
         subject={subject}
