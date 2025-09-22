@@ -5,7 +5,9 @@ import { useRouter, useParams } from "next/navigation";
 import TermSelection from "@/components/termTopicSelector";
 import { useMemo } from "react";
 import useSWR from 'swr';
-import { subjectDetailPageFetcher } from '@/lib/fetchers/subjectDetailFetcher'; // Import the correct fetcher
+import { subjectDetailPageFetcher } from '@/lib/fetchers/subjectDetailFetcher'; 
+import { HttpError } from "@/lib/error";
+
 
 export default function SubjectTopicsPage() {
   const router = useRouter();
@@ -20,7 +22,9 @@ export default function SubjectTopicsPage() {
   const swrKey = subjectSlug ? ['subject-detail-page', subjectSlug] : null;
   const { data, error, isLoading } = useSWR(swrKey, subjectDetailPageFetcher, {
     onError: (err) => {
-      if (err.status === 401) router.push('/auth/login');
+      if (err instanceof HttpError && err.status === 401) {
+        router.push('/auth/login');
+      }
     }
   });
 

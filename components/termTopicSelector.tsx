@@ -428,6 +428,8 @@ export default function TermSelection({
                 {isCompleted ? "Completed" : savingProgress ? "Saving..." : "Mark as Completed"}
               </Button>
               <Button onClick={handleBackToSubject} className="ml-9">Back To Subjects</Button>
+           
+              {progressError && <p className="text-sm text-red-500 ml-4">Couldn't save progress.</p>}
             </div>
 
           </div>

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { getUserProfileClient } from "@/lib/getUserProfileClient";
 import { Database } from '@/supabaseTypes';
+import { HttpError } from "../error"; 
 
 type Topic = Database['public']['Tables']['topics']['Row'];
 
@@ -11,9 +12,7 @@ export const subjectDetailPageFetcher = async ([_key, subjectSlug]: [string, str
   console.log(`[FETCHER] Received subjectSlug in subject detail page fetcter: "${subjectSlug}"`);
   const profileData = await getUserProfileClient();
   if (!profileData) {
-    const error = new Error("User not authenticated");
-    (error as any).status = 401;
-    throw error
+    throw new HttpError("User not authenticated", 401);
   }
   const { profile } = profileData;
   const gradeId = profile.grade_id;

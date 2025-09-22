@@ -147,7 +147,7 @@ import useSWR from 'swr';
 import SubjectCards from "@/components/subjectCard";
 import { subjectsPageFetcher } from '@/lib/fetchers/subjectFetcher'; 
 import { Database } from '@/supabaseTypes';
-
+import { HttpError } from '@/lib/error';
 // Define the type for the data SWR will return. This improves type safety.
 type SubjectsPageData = {
   subjects: Database['public']['Tables']['subjects']['Row'][];
@@ -163,7 +163,9 @@ export default function SubjectsPage() {
   const { data, error, isLoading } = useSWR<SubjectsPageData>('subjects-page-data', subjectsPageFetcher, {
     onError: (err) => {
       // This will automatically redirect the user if they are not logged in.
-      if (err.status === 401) router.push('/auth/login');
+      if (err instanceof HttpError && err.status === 401) {
+        router.push('/auth/login');
+      }
     }
   });
 

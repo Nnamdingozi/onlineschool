@@ -5,6 +5,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { getUserProfileClient } from "@/lib/getUserProfileClient";
 import { Database } from '@/supabaseTypes';
+import { HttpError } from "../error";
 
 // Type definitions for clarity
 type Subject = Database['public']['Tables']['subjects']['Row'];
@@ -19,9 +20,7 @@ export const subjectsPageFetcher = async () => {
   // 1. Get user profile and gradeId
   const profileData = await getUserProfileClient();
   if (!profileData) {
-    const error = new Error("User not authenticated");
-    (error as any).status = 401; // For SWR redirection
-    throw error;
+    throw new HttpError("User not authenticated", 401);
   }
   const { profile } = profileData;
   const gradeId = profile.grade_id;
