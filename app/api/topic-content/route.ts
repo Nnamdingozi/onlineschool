@@ -3,6 +3,8 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { Database } from "@/supabaseTypes";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 const contentRequestSchema = z.object({
   topicId: z.number(),
@@ -18,8 +20,10 @@ type ContentRequestParams = z.infer<typeof contentRequestSchema>;
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
+type TypedSupabaseClient = SupabaseClient<Database>;
+
 // 🔹 Helper: fetch or generate note
-async function getNote(supabase: any, params: ContentRequestParams) {
+async function getNote(supabase: TypedSupabaseClient, params: ContentRequestParams) {
   const { data: existing } = await supabase
     .from("notes")
     .select("content")
@@ -56,7 +60,7 @@ async function getNote(supabase: any, params: ContentRequestParams) {
 }
 
 // 🔹 Helper: fetch or generate quiz
-async function getQuiz(supabase: any, params: ContentRequestParams) {
+async function getQuiz(supabase: TypedSupabaseClient, params: ContentRequestParams) {
   const { data: existing } = await supabase
     .from("quizzes")
     .select("content")
@@ -143,19 +147,17 @@ export async function POST(request: Request) {
 
 
     return NextResponse.json(responseData);
-  } catch (error: any) {
-    console.error("[API /topic-content] Error:", error);
-
-
+  } catch (error) {
+   
     let errorMessage = "An unexpected error occurred.";
-    let statusCode = 500;
+    const statusCode = 500;
 
     // Check if it's an object with a 'message' property (like a standard Error)
     if (error instanceof Error) {
       errorMessage = error.message;
     }
 
-
+    console.error("[API /topic-content] Error:", errorMessage);
 
     return NextResponse.json(
       { error: "Failed to generate note", details: errorMessage },

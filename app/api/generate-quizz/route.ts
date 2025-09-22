@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
       // ✅  Use a type guard to determine what the error is.
       let errorMessage = "An unexpected error occurred.";
-      let statusCode = 500;
+    const  statusCode = 500;
 
       // Check if it's an object with a 'message' property (like a standard Error)
       if (err instanceof Error) {
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
 
 
     let errorMessage = "An unexpected error occurred.";
-    let statusCode = 500;
+    const statusCode = 500;
 
     // Check if it's an object with a 'message' property (like a standard Error)
     if (error instanceof Error) {

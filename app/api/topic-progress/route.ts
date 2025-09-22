@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
 
     let errorMessage = "An unexpected error occurred.";
-    let statusCode = 500;
+    const statusCode = 500;
 
     // Check if it's an object with a 'message' property (like a standard Error)
     if (error instanceof Error) {
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Ensure the GET handler also follows this pattern
-export async function GET(request: NextRequest) {
+export async function GET() {
   // ✅ THE FIX: Create a fresh, request-specific client HERE.
   const supabase = await createClient();
   try {
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     // ... rest of GET handler
   } catch (error) {
     let errorMessage = "An unexpected error occurred.";
-    let statusCode = 500;
+    const statusCode = 500;
 
     // Check if it's an object with a 'message' property (like a standard Error)
     if (error instanceof Error) {

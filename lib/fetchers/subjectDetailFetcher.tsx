@@ -9,7 +9,7 @@ type Topic = Database['public']['Tables']['topics']['Row'];
 
 export const subjectDetailPageFetcher = async ([_key, subjectSlug]: [string, string]) => {
   const supabase = createClient();
-  console.log(`[FETCHER] Received subjectSlug in subject detail page fetcter: "${subjectSlug}"`);
+  console.log(`[FETCHER] Received subjectSlug in subject detail page fetcter: "${subjectSlug}" , "${_key}"`);
   const profileData = await getUserProfileClient();
   if (!profileData) {
     throw new HttpError("User not authenticated", 401);

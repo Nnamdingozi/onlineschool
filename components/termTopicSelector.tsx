@@ -137,6 +137,11 @@ export default function TermSelection({
   const progressSWRKey = selectedTopic ? ['/api/topic-progress', selectedTopic.id] : null;
   const { data: progressData, error: progressError, mutate: mutateProgress } = useSWR(progressSWRKey, progressFetcher);
 
+  if (progressError){
+    console.log('error saving progress', progressError)
+  }
+  
+  
   // Derive the completion state from SWR data
   const isCompleted = progressData?.is_completed ?? false;
 
@@ -429,7 +434,7 @@ export default function TermSelection({
               </Button>
               <Button onClick={handleBackToSubject} className="ml-9">Back To Subjects</Button>
            
-              {progressError && <p className="text-sm text-red-500 ml-4">Could not  save progress.</p>}
+              
             </div>
 
           </div>
