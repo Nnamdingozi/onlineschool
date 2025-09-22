@@ -1,6 +1,6 @@
 
 import 'dotenv/config';
-import { supabaseServer } from "@/lib/supabase/serverClient";
+import { supabaseAdmin  } from "@/lib/supabase/admin";
 import { GoogleGenAI } from "@google/genai";
 
 // type SubjectGrade = Database['public']['Tables']['subject_grades']['Row'];
@@ -18,14 +18,14 @@ const genAI = new GoogleGenAI({
 async function generateTopicsOnceforss() {
   try {
     // 1. Fetch subject-grade links
-    const { data: subjectGrades, error: sgError } = await supabaseServer
+    const { data: subjectGrades, error: sgError } = await supabaseAdmin
       .from('subject_grades')
       .select('subject_id, grade_id');
     if (sgError) throw sgError;
     console.log("Fetched subjects-grades:", subjectGrades);
     
     // 2. Fetch subjects
-    const { data: subjects, error: subjError } = await supabaseServer
+    const { data: subjects, error: subjError } = await supabaseAdmin
       .from('subjects')
       .select('*');
     if (subjError) throw subjError;
@@ -34,14 +34,14 @@ async function generateTopicsOnceforss() {
 
 
     // 3. Fetch grades
-    const { data: grades, error: gradeError } = await supabaseServer
+    const { data: grades, error: gradeError } = await supabaseAdmin
       .from('grades')
       .select('*');
     if (gradeError) throw gradeError;
     console.log("Fetched grades:", grades);
 
     // 4. Fetch terms
-    const { data: terms, error: termError } = await supabaseServer
+    const { data: terms, error: termError } = await supabaseAdmin
       .from('terms')
       .select('*');
     if (termError) throw termError;
@@ -129,7 +129,7 @@ async function generateTopicsOnceforss() {
           title: t,
         }));
 
-        const { error: upsertError } = await supabaseServer
+        const { error: upsertError } = await supabaseAdmin
           .from('topics')
           .upsert(newTopics, {
             onConflict: "subject_id,grade_id,term_id,title",

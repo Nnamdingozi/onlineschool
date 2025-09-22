@@ -7,6 +7,7 @@ import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { hasEnvVars } from "@/lib/utils";
 import Image from "next/image";
+import { Providers } from './provider';
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -38,6 +39,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Providers>
           <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
             <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
              <Image height={60} width={140} src={'/images/logo1.png'} alt="site logo" className="rounded"></Image>
@@ -69,6 +71,7 @@ export default function RootLayout({
             </p>
 
           </footer>
+          </Providers >
         </ThemeProvider>
       </body>
     </html>

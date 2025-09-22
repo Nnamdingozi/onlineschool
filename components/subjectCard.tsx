@@ -7,6 +7,7 @@ import { Card, CardContent } from './ui/card';
 import { BookOpen, Clock, Users } from 'lucide-react';
 import { getSubjectColor } from '@/lib/subjectColourSelector';
 
+
 type Subject = Database['public']['Tables']['subjects']['Row'];
 type ProgressData = Database['public']['Tables']['student_subject_progress']['Row'];
 
@@ -17,22 +18,19 @@ interface SubjectCardsProps {
   topicCounts: Record<number, number>;
 }
 
+
+
 export default function SubjectCards({ subjects, handleSubjectClick, progressData, topicCounts }: SubjectCardsProps) {
+  console.log("[COMPONENT] Received topicCounts prop:", topicCounts);
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {subjects.map(subject => {
-        // ✅ find this subject's progress
-        const subjectProgress = progressData?.find(
-          (p) => p.subject_id === subject.id
-        );
-
+        const subjectProgress = progressData?.find(p => p.subject_id === subject.id);
         const progress = subjectProgress?.progress_percentage ?? 0;
-        const topics = subjectProgress?.total_topics ?? 0;
         const completedTopics = subjectProgress?.completed_topics ?? 0;
-        const topicCount = topicCounts[subject.id] ?? 0;
+        const totalTopics = topicCounts[subject.id] ?? 0;
 
         const color = getSubjectColor(subject.name ?? 'unknown');
-   
 
         return (
           <Card
@@ -45,10 +43,10 @@ export default function SubjectCards({ subjects, handleSubjectClick, progressDat
                   <BookOpen className="h-6 w-6 text-white" />
                 </div>
                 <div className="text-right">
-                <p className="text-sm text-muted-foreground">Total Topics: {topicCount}</p>
+                <p className="text-sm text-muted-foreground">   <p>Total Topics: {totalTopics}</p></p>
                   <p className="text-sm text-muted-foreground">Progress</p>
                   <p className="text-lg font-semibold text-primary">
-                    {progress}%
+                  <span> {progress} </span> %
                   </p>
                 </div>
               </div>
@@ -65,7 +63,7 @@ export default function SubjectCards({ subjects, handleSubjectClick, progressDat
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
                     <span>
-                      {completedTopics}/{topics} topics
+                    {completedTopics}/{totalTopics} topics
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -84,8 +82,8 @@ export default function SubjectCards({ subjects, handleSubjectClick, progressDat
 
               <Button
                 onClick={() => {
-                  if (subject.name) {
-                    handleSubjectClick(subject.name);
+                  if (subject.slug) {
+                    handleSubjectClick(subject.slug);
                   }
                 }}
                 className="w-full"

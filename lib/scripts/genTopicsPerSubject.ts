@@ -1,6 +1,6 @@
 
 import 'dotenv/config';
-import { supabaseServer } from "@/lib/supabase/serverClient";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { GoogleGenAI } from "@google/genai";
 
 
@@ -12,7 +12,7 @@ const genAI = new GoogleGenAI({
 async function generateTopicsOnce() {
   try {
     // 1. Fetch subject-grade links
-    const { data: subjectGrades, error: sgError } = await supabaseServer
+    const { data: subjectGrades, error: sgError } = await supabaseAdmin
       .from('subject_grades')
       .select('subject_id, grade_id');
     if (sgError) throw sgError;
@@ -20,7 +20,7 @@ async function generateTopicsOnce() {
 
 
     // 2. Fetch subjects
-    const { data: subjects, error: subjError } = await supabaseServer
+    const { data: subjects, error: subjError } = await supabaseAdmin
       .from('subjects')
       .select('*');
     if (subjError) throw subjError;
@@ -29,14 +29,14 @@ async function generateTopicsOnce() {
 
 
     // 3. Fetch grades
-    const { data: grades, error: gradeError } = await supabaseServer
+    const { data: grades, error: gradeError } = await supabaseAdmin
       .from('grades')
       .select('*');
     if (gradeError) throw gradeError;
     console.log("Fetched grades:", grades);
 
     // 4. Fetch terms
-    const { data: terms, error: termError } = await supabaseServer
+    const { data: terms, error: termError } = await supabaseAdmin
       .from('terms')
       .select('*');
     if (termError) throw termError;
@@ -103,7 +103,7 @@ async function generateTopicsOnce() {
 
         // 8. Insert topics only if not already in DB
         for (const topic of topics) {
-          const { data: existing, error: checkError } = await supabaseServer
+          const { data: existing, error: checkError } = await supabaseAdmin
             .from('topics')
             .select('id')
             .eq('subject_id', sg.subject_id)
@@ -119,7 +119,7 @@ async function generateTopicsOnce() {
             continue;
           }
 
-          await supabaseServer.from('topics').insert({
+          await supabaseAdmin.from('topics').insert({
             subject_id: sg.subject_id,
             grade_id: sg.grade_id,
             term_id: term.id,

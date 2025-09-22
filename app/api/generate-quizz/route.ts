@@ -6,8 +6,21 @@ const ai = new GoogleGenAI({
   apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY!,
 });
 
+// ✅ Mapping of Grades → Nigerian School Levels
+const gradeMapping: Record<string, string> = {
+  "Grade 1": "JSS 1",
+  "Grade 2": "JSS 2",
+  "Grade 3": "JSS 3",
+  "Grade 4": "SS 1",
+  "Grade 5": "SS 2",
+  "Grade 6": "SS 3",
+};
+
 export async function POST(req: Request) {
   const { grade, term, subject, topic } = await req.json();
+
+  // ✅ Translate grade into Nigerian school level
+    const mappedGrade = gradeMapping[grade] || grade;
 
   const numQuestions = 10;
   const prompt = `
@@ -15,7 +28,7 @@ export async function POST(req: Request) {
     Generate a ${numQuestions}-question multiple-choice quiz for:
     - Subject: ${subject}
     - Topic: ${topic}
-    - Grade: ${grade}
+    - Grade: ${mappedGrade}
     - Term: ${term}
 
     Rules:
