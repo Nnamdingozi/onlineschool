@@ -43,7 +43,7 @@ export default function SubjectCards({ subjects, handleSubjectClick, progressDat
                   <BookOpen className="h-6 w-6 text-white" />
                 </div>
                 <div className="text-right">
-                <p className="text-sm text-muted-foreground">   <p>Total Topics: {totalTopics}</p></p>
+                <p className="text-sm text-muted-foreground"> Total Topics: {totalTopics}</p>
                   <p className="text-sm text-muted-foreground">Progress</p>
                   <p className="text-lg font-semibold text-primary">
                   <span> {progress} </span> %
