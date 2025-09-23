@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import useSWR from 'swr';
 import { RotateCw } from "lucide-react";
-import { Volume2, Loader2, Square } from 'lucide-react'; // Import a "stop" icon
+import { Volume2, Square } from 'lucide-react'; 
 import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 
 
