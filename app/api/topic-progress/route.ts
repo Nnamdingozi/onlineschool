@@ -105,8 +105,8 @@ import { z } from 'zod';
 export const dynamic = 'force-dynamic';
 
 // --- GET Handler ---
-export async function GET(request: NextRequest) { // ✅ FIX 1: Add the `request` parameter back.
-  // ✅ FIX 2: Remove `await`. createClient is synchronous.
+export async function GET(request: NextRequest) { 
+  
   const supabase = await createClient();
 
   try {
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) { // ✅ FIX 1: Add the `request
 
     if (error) {
       console.error("[API GET] Database error:", error);
-      throw error; // Let the catch block handle it
+      throw error; 
     }
 
     const response = NextResponse.json({ is_completed: data?.is_completed ?? false });
@@ -137,12 +137,15 @@ export async function GET(request: NextRequest) { // ✅ FIX 1: Add the `request
 
   } catch (error) {
     // This is the catch block for the entire GET handler.
+
     let errorMessage = "An unexpected error occurred.";
     if (error instanceof Error) {
       errorMessage = error.message;
     }
     console.error("[API GET] Caught a fatal error:", errorMessage);
+    
     return NextResponse.json(
+
       { error: "Failed to fetch topic progress", details: errorMessage },
       { status: 500 }
     );
@@ -155,8 +158,8 @@ const postRequestSchema = z.object({
   subjectId: z.number(),
 });
 
-export async function POST(request: NextRequest) { // This handler already correctly had the `request` parameter
-  // ✅ FIX 2: Remove `await`.
+export async function POST(request: NextRequest) { 
+  
   const supabase = await createClient();
 
   try {
@@ -168,7 +171,7 @@ export async function POST(request: NextRequest) { // This handler already corre
     const body = await request.json();
     const validation = postRequestSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ error: 'Invalid request body', details: validation.error.format() }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid request body', details: validation.error}, { status: 400 });
     }
     const { topicId, subjectId } = validation.data;
 
@@ -190,7 +193,7 @@ export async function POST(request: NextRequest) { // This handler already corre
     return NextResponse.json({ success: true, is_completed: true });
 
   } catch (error) {
-    // Catch block for the POST handler
+    
     let errorMessage = "An unexpected error occurred.";
     if (error instanceof Error) {
       errorMessage = error.message;

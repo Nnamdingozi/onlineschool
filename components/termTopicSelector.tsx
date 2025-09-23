@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import useSWR from 'swr';
 import { RotateCw } from "lucide-react";
+import { Volume2, Loader2, Square } from 'lucide-react'; // Import a "stop" icon
+import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 
 
 
@@ -150,6 +152,17 @@ export default function TermSelection({
   // Derive note and quiz from the single data object
   const note = data?.note;
   const quiz = data?.quiz || [];
+
+
+  const { isSpeaking, speak, cancel, supported} = useSpeechSynthesis();
+
+  const handleSpeak = () => {
+    if (isSpeaking) {
+      cancel();
+    } else if (note) {
+      speak(note);
+    }
+  };
 
 
   // 🔹 Mark Topic as Completed
@@ -307,7 +320,19 @@ export default function TermSelection({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" /> Note
+                <div className="flex items-center gap-2"><BookOpen /> Notes</div>
+            
+            {/* Play/Stop Button - only render if supported */}
+            {supported && note && !isLoading && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSpeak}
+                aria-label={isSpeaking ? "Stop reading" : "Read note aloud"}
+              >
+                {isSpeaking ? <Square /> : <Volume2 />}
+              </Button>
+            )}
                 </CardTitle>
               </CardHeader>
               <CardContent>

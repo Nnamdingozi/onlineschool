@@ -53,7 +53,7 @@ export const subjectsPageFetcher = async () => {
   }
   console.log("[FETCHER] Final Topic Counts Map:", topicCountsMap);
   return {
-    subjects, // This is an array of subjects
+    subjects, 
     progressData: progressResult.data ?? [],
     grade: gradeResult.data,
     topicCounts: topicCountsMap,
