@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import useSWR from 'swr';
 import { RotateCw } from "lucide-react";
-import { Volume2, Square } from 'lucide-react'; 
+import { Volume2, Pause, Rewind, FastForward } from 'lucide-react'; 
 import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 
 
@@ -153,16 +153,38 @@ export default function TermSelection({
   const note = data?.note;
   const quiz = data?.quiz || [];
 
+  const { speechState, speak, pause, resume, cancel, rewind, fastForward, supported } = useSpeechSynthesis(note || '');
 
-  const { isSpeaking, speak, cancel, supported} = useSpeechSynthesis();
 
-  const handleSpeak = () => {
-    if (isSpeaking) {
-      cancel();
-    } else if (note) {
+  const handleToggleSpeech = () => {
+    if (!note) return;
+    if (speechState === 'idle') {
       speak(note);
+    } else if (speechState === 'playing') {
+      pause();
+    } else if (speechState === 'paused') {
+      resume();
     }
   };
+
+
+
+  // Helper function to determine which icon and label to show
+  const getControl = () => {
+    if (speechState === 'playing') {
+      return { Icon: Pause, label: 'Pause reading' };
+    }
+    if (speechState === 'paused') {
+      return { Icon: Play, label: 'Resume reading' };
+    }
+    // Default is the 'idle' state
+    return { Icon: Volume2, label: 'Read note aloud' };
+  };
+
+  const { Icon, label } = getControl();
+
+    // Determine if the seek buttons should be active
+    const canSeek = speechState === 'playing' || speechState === 'paused';
 
 
   // 🔹 Mark Topic as Completed
@@ -322,16 +344,52 @@ export default function TermSelection({
                 <CardTitle className="flex items-center gap-2">
                 <div className="flex items-center gap-2"><BookOpen /> Notes</div>
             
-            {/* Play/Stop Button - only render if supported */}
-            {supported && note && !isLoading && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSpeak}
-                aria-label={isSpeaking ? "Stop reading" : "Read note aloud"}
-              >
-                {isSpeaking ? <Square /> : <Volume2 />}
-              </Button>
+                {supported && note && !isLoading && (
+              <div className="flex items-center gap-1">
+                {/* ✅ Rewind Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={rewind}
+                  disabled={!canSeek}
+                  aria-label="Rewind to previous sentence"
+                >
+                  <Rewind />
+                </Button>
+
+                {/* Play/Pause/Resume Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleToggleSpeech}
+                  aria-label={label}
+                >
+                  <Icon />
+                </Button>
+
+                {/* ✅ Fast Forward Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={fastForward}
+                  disabled={!canSeek}
+                  aria-label="Fast forward to next sentence"
+                >
+                  <FastForward />
+                </Button>
+
+                {/* Stop Button */}
+                {canSeek && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={cancel}
+                    aria-label="Stop and reset"
+                  >
+                    Stop
+                  </Button>
+                )}
+              </div>
             )}
                 </CardTitle>
               </CardHeader>
