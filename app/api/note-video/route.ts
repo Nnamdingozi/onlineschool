@@ -67,8 +67,16 @@ export async function POST(request: Request) {
     const { data: { publicUrl } } = supabase.storage.from('videos').getPublicUrl(filePath);
     return NextResponse.json({ status: 'complete', videoUrl: publicUrl });
 
-  } catch (error: any) {
-    console.error("[API /note-video] FATAL ERROR in POST handler:", error);
-    return NextResponse.json({ error: "Failed to generate video.", details: error.message }, { status: 500 });
+  } catch (error) {
+    // Your existing robust catch block is good.
+    let errorMessage = "An unexpected error occurred.";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    console.error("[API /topic-content] Error:", errorMessage);
+    return NextResponse.json(
+      { error: "Failed to process content request", details: errorMessage },
+      { status: 500 }
+    );
   }
 }

@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from "@/lib/supabase/server";
 import { Database } from '@/supabaseTypes';
-
+import { SupabaseClient } from '@supabase/supabase-js';
 // --- Type Definitions ---
 const contentRequestSchema = z.object({
   topicId: z.number(),
@@ -20,13 +20,14 @@ type ContentRequestParams = z.infer<typeof contentRequestSchema>;
 type Note = Database['public']['Tables']['notes']['Row'];
 type QuizItem = { question: string; options: string[]; answer: string; };
 type Quiz = QuizItem[]; // Our contract: Quiz is an array of QuizItems.
+type TypedSupabaseClient = SupabaseClient<Database>;
 
 // Use a helper for the base URL
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 // --- Helper Functions (Now with consistent return types) ---
 
-async function getNote(supabase: any, params: ContentRequestParams): Promise<Note | null> {
+async function getNote(supabase: TypedSupabaseClient, params: ContentRequestParams): Promise<Note | null> {
   const { data: existingNote } = await supabase
     .from("notes")
     .select("*") // Select all columns to get the full object
@@ -69,7 +70,7 @@ async function getNote(supabase: any, params: ContentRequestParams): Promise<Not
   return newNote;
 }
 
-async function getQuiz(supabase: any, params: ContentRequestParams): Promise<Quiz | null> {
+async function getQuiz(supabase: TypedSupabaseClient, params: ContentRequestParams): Promise<Quiz | null> {
   const { data: existing } = await supabase
     .from("quizzes")
     .select("content")
