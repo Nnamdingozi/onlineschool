@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card";
 import { BookOpen, Play, Brain, ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
 import { Database } from "@/supabaseTypes";
@@ -9,19 +9,20 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import useSWR from 'swr';
 import { RotateCw } from "lucide-react";
-import { Volume2, Pause, Rewind, FastForward } from 'lucide-react'; 
+import { Volume2, Pause, Rewind, FastForward } from 'lucide-react';
 import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
+import VideoGenerator from "./video-generator";
 
 
 
 type Subject = Database["public"]["Tables"]["subjects"]["Row"];
 type Term = Database["public"]["Tables"]["terms"]["Row"];
 type Topic = Database["public"]["Tables"]["topics"]["Row"];
-// type Note = Database["public"]["Tables"]["notes"]["Row"];
+type Note = Database["public"]["Tables"]["notes"]["Row"];
 // type Quiz = Database["public"]["Tables"]["quizzes"]["Row"];
 
 type TopicContent = {
-  note: string | null;
+  note: Note | null;
   quiz: QuizItem[] | null;
   error?: string | null;
 }
@@ -98,7 +99,7 @@ export default function TermSelection({
 }: TermSelectionProps) {
 
   const [expandedTermId, setExpandedTermId] = useState<number | null>(initialSelectedTermId || null);
-
+  const [displayableQuiz, setDisplayableQuiz] = useState<QuizItem[] | null>(null);
   // Find the full "Term" object based on the initial ID provided by the parent.
   const initialTerm = useMemo(() => {
     if (!initialSelectedTermId) return null;
@@ -139,27 +140,44 @@ export default function TermSelection({
   const progressSWRKey = selectedTopic ? ['/api/topic-progress', selectedTopic.id] : null;
   const { data: progressData, error: progressError, mutate: mutateProgress } = useSWR(progressSWRKey, progressFetcher);
 
-  if (progressError){
+  if (progressError) {
     console.log('error saving progress', progressError)
   }
-  
-  
+
+
   // Derive the completion state from SWR data
   const isCompleted = progressData?.is_completed ?? false;
 
-
+  // ✅ STEP 2: Use a `useEffect` to safely synchronize the SWR data with our new state.
+  // This effect will ONLY run when the `data` object from SWR changes.
+  useEffect(() => {
+    // Check if the data has arrived AND if the quiz property within it is a valid array.
+    if (data && Array.isArray(data.quiz)) {
+      console.log("[EFFECT] SWR data is valid. Setting displayableQuiz.", data.quiz);
+      // If it's valid, we update our "safe" state variable.
+      setDisplayableQuiz(data.quiz);
+    } else {
+      // If data arrives but has no quiz, or the quiz is not an array,
+      // we ensure our safe state is null.
+      console.log("[EFFECT] SWR data is missing or quiz is not an array. Clearing displayableQuiz.", data?.quiz);
+      setDisplayableQuiz(null);
+    }
+  }, [data]); // This is the dependency array. The effect runs when `data` changes.
 
   // Derive note and quiz from the single data object
-  const note = data?.note;
-  const quiz = data?.quiz || [];
+  const noteObject = data?.note; // This is the full object { id, content, ... }
+  const noteText = noteObject?.content; // This is the string for display or speech
+  const noteId = noteObject?.id; // This will now work without error!
+  // const quiz = data?.quiz ;
+  // console.log('quizz in term selector component', quiz)
 
-  const { speechState, speak, pause, resume, cancel, rewind, fastForward, supported } = useSpeechSynthesis(note || '');
+  const { speechState, speak, pause, resume, cancel, rewind, fastForward, supported } = useSpeechSynthesis(noteText || '');
 
 
   const handleToggleSpeech = () => {
-    if (!note) return;
+    if (!noteText) return;
     if (speechState === 'idle') {
-      speak(note);
+      speak(noteText);
     } else if (speechState === 'playing') {
       pause();
     } else if (speechState === 'paused') {
@@ -183,8 +201,8 @@ export default function TermSelection({
 
   const { Icon, label } = getControl();
 
-    // Determine if the seek buttons should be active
-    const canSeek = speechState === 'playing' || speechState === 'paused';
+  // Determine if the seek buttons should be active
+  const canSeek = speechState === 'playing' || speechState === 'paused';
 
 
   // 🔹 Mark Topic as Completed
@@ -264,6 +282,7 @@ export default function TermSelection({
     setSubmitted(false);
     setScore(null);
     setIsQuizVisible(false);
+    setDisplayableQuiz(null);
   };
 
   //  Option selection for quizz
@@ -274,9 +293,9 @@ export default function TermSelection({
 
   // Submit quizz
   const handleSubmitQuiz = () => {
-    if (!quiz) return;
+    if (!displayableQuiz) return;
     let correctCount = 0;
-    quiz.forEach((q, i) => {
+    displayableQuiz.forEach((q, i) => {
       if (answers[i] === q.answer) {
         correctCount++;
       }
@@ -342,62 +361,62 @@ export default function TermSelection({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                <div className="flex items-center gap-2"><BookOpen /> Notes</div>
-            
-                {supported && note && !isLoading && (
-              <div className="flex items-center gap-1">
-                {/* ✅ Rewind Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={rewind}
-                  disabled={!canSeek}
-                  aria-label="Rewind to previous sentence"
-                >
-                  <Rewind />
-                </Button>
+                  <div className="flex items-center gap-2"><BookOpen /> Notes</div>
 
-                {/* Play/Pause/Resume Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleToggleSpeech}
-                  aria-label={label}
-                >
-                  <Icon />
-                </Button>
+                  {supported && noteText && !isLoading && (
+                    <div className="flex items-center gap-1">
+                      {/* ✅ Rewind Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={rewind}
+                        disabled={!canSeek}
+                        aria-label="Rewind to previous sentence"
+                      >
+                        <Rewind />
+                      </Button>
 
-                {/* ✅ Fast Forward Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={fastForward}
-                  disabled={!canSeek}
-                  aria-label="Fast forward to next sentence"
-                >
-                  <FastForward />
-                </Button>
+                      {/* Play/Pause/Resume Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleToggleSpeech}
+                        aria-label={label}
+                      >
+                        <Icon />
+                      </Button>
 
-                {/* Stop Button */}
-                {canSeek && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={cancel}
-                    aria-label="Stop and reset"
-                  >
-                    Stop
-                  </Button>
-                )}
-              </div>
-            )}
+                      {/* ✅ Fast Forward Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={fastForward}
+                        disabled={!canSeek}
+                        aria-label="Fast forward to next sentence"
+                      >
+                        <FastForward />
+                      </Button>
+
+                      {/* Stop Button */}
+                      {canSeek && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={cancel}
+                          aria-label="Stop and reset"
+                        >
+                          Stop
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoading && <p>Loading content...</p>}
                 {error && <p className="text-red-500">Error: {error.message}</p>}
-                {data && !note && <p>Note could not be loaded for this topic Refresh page.</p>}
-                {note && <div className="whitespace-pre-wrap">{note}</div>}
+                {data && !noteText && <p>Note could not be loaded for this topic Refresh page.</p>}
+                {noteText && <div className="whitespace-pre-wrap">{noteText}</div>}
               </CardContent>
             </Card>
 
@@ -405,11 +424,14 @@ export default function TermSelection({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Play className="h-5 w-5" /> Video
+                  <Play className="h-5 w-5" /> Wait For Video
+
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Preview or link to video content for this topic.</p>
+                {noteText && noteId && subject.name && (
+                  <VideoGenerator noteId={noteId} noteText={noteText} subjectName={subject.name} />
+                )}
               </CardContent>
             </Card>
 
@@ -431,73 +453,76 @@ export default function TermSelection({
                     </Button>
                   </div>
                 )}
-                {data && !quiz && <p>A quiz could not be loaded for this topic.</p>}
+                {!isLoading && !error && !displayableQuiz && <p>A quiz could not be loaded for this topic.</p>}
 
-                {quiz && !isQuizVisible && (
+
+                {displayableQuiz && !isQuizVisible && (
                   <Button onClick={() => setIsQuizVisible(true)}>Start Quiz</Button>
                 )}
 
                 {/* quizz display */}
-                {quiz && isQuizVisible && (
-                  Array.isArray(quiz) ? (
-                    <div className="space-y-6">
-                      {quiz.map((q, i) => (
-                        <div key={i} className="border p-3 rounded">
-                          <p className="font-semibold mb-2">{i + 1}. {q.question}</p>
-                          <div className="space-y-1">
-                            {q.options.map((opt, j) => (
-                              <label key={j} className="flex items-center gap-2">
-                                <input
-                                  type="radio"
-                                  name={`question-${i}`}
-                                  value={opt}
-                                  disabled={submitted}
-                                  checked={answers[i] === opt}
-                                  onChange={() => handleOptionChange(i, opt)}
-                                />
-                                <span>{opt}</span>
-                              </label>
-                            ))}
-                          </div>
-
-                          {/* After submit → show feedback */}
-                          {submitted && (
-                            <div className="mt-2">
-                              {answers[i] === q.answer ? (
-                                <p className="text-green-600">✅ Correct!</p>
-                              ) : (
-                                <div>
-                                  <p className="text-red-600">❌ Incorrect.</p>
-                                  <p className="text-green-700">✔ Correct Answer: {q.answer}</p>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-
-                      {/* Submit button */}
-                      {!submitted && (
-                        <Button
-                          onClick={handleSubmitQuiz}
-                          disabled={Object.keys(answers).length !== quiz.length}
-                        >
-                          Submit Quiz
-                        </Button>
-                      )}
-
-                      {/* Score summary */}
-                      {submitted && score !== null && (
-                        <p className="font-bold mt-4">
-                          Your Score: {score}/{quiz.length}
+                {displayableQuiz && isQuizVisible ? (
+                  <div className="space-y-6">
+                    {displayableQuiz.map((q, i) => (
+                      <div key={i} className="border p-3 rounded">
+                        <p className="font-semibold mb-2">
+                          {i + 1}. {q.question}
                         </p>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-red-500">
-                      Quiz data is available but in an incorrect format. Please try again or contact support.
-                    </p>
-                  )
+
+                        <div className="space-y-1">
+                          {q.options.map((opt, j) => (
+                            <label key={j} className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name={`question-${i}`}
+                                value={opt}
+                                disabled={submitted}
+                                checked={answers[i] === opt}
+                                onChange={() => handleOptionChange(i, opt)}
+                              />
+                              <span>{opt}</span>
+                            </label>
+                          ))}
+                        </div>
+
+                        {/* After submit → show feedback */}
+                        {submitted && (
+                          <div className="mt-2">
+                            {answers[i] === q.answer ? (
+                              <p className="text-green-600">✅ Correct!</p>
+                            ) : (
+                              <div>
+                                <p className="text-red-600">❌ Incorrect.</p>
+                                <p className="text-green-700">✔ Correct Answer: {q.answer}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Submit button */}
+                    {!submitted && (
+                      <Button
+                        onClick={handleSubmitQuiz}
+                        disabled={Object.keys(answers).length !== displayableQuiz.length}
+                      >
+                        Submit Quiz
+                      </Button>
+                    )}
+
+                    {/* Score summary */}
+                    {submitted && score !== null && (
+                      <p className="font-bold mt-4">
+                        Your Score: {score}/{displayableQuiz.length}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-red-500">
+                    Quiz data is available but cannot be displayed now. . Please try again or
+                    contact support.
+                  </p>
                 )}
 
               </CardContent>
@@ -516,8 +541,8 @@ export default function TermSelection({
                 {isCompleted ? "Completed" : savingProgress ? "Saving..." : "Mark as Completed"}
               </Button>
               <Button onClick={handleBackToSubject} className="ml-9">Back To Subjects</Button>
-           
-              
+
+
             </div>
 
           </div>

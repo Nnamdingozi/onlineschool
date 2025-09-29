@@ -36,11 +36,12 @@ export async function POST(req: Request) {
     - Provide exactly 4 options: 1 correct and 3 plausible distractors.
     - Use clear, simple wording suitable for the grade.
     - Format output as valid JSON ONLY in this structure:
+    - Do not add numbering to the questions
 
     {
       "quiz": [
         {
-          "question": "1. Your question here",
+          "question": Your question here",
           "options": ["opt1", "opt2", "opt3", "opt4"],
           "answer": "the correct option here"
         }
@@ -65,12 +66,13 @@ export async function POST(req: Request) {
         .trim();
 
       quizData = JSON.parse(cleaned);
+      console.log('cleaned quzz data', quizData)
     } catch (err) {
       console.error("Failed to parse AI response:", err);
 
       // ✅  Use a type guard to determine what the error is.
       let errorMessage = "An unexpected error occurred.";
-    const  statusCode = 500;
+      const statusCode = 500;
 
       // Check if it's an object with a 'message' property (like a standard Error)
       if (err instanceof Error) {
@@ -86,7 +88,7 @@ export async function POST(req: Request) {
     }
 
 
-    return NextResponse.json({ quiz: quizData.quiz || [] });
+    return NextResponse.json(quizData || []);
   } catch (error) {
     console.error("Quiz generation error:", error);
 

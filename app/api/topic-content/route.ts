@@ -1,11 +1,12 @@
 
 // app/api/topic-content/route.ts
-import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
-import { Database } from "@/supabaseTypes";
-import { SupabaseClient } from "@supabase/supabase-js";
 
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { createClient } from "@/lib/supabase/server";
+import { Database } from '@/supabaseTypes';
+
+// --- Type Definitions ---
 const contentRequestSchema = z.object({
   topicId: z.number(),
   termId: z.number(),
@@ -15,117 +16,119 @@ const contentRequestSchema = z.object({
   subjectName: z.string(),
   topicTitle: z.string(),
 });
-
 type ContentRequestParams = z.infer<typeof contentRequestSchema>;
+type Note = Database['public']['Tables']['notes']['Row'];
+type QuizItem = { question: string; options: string[]; answer: string; };
+type Quiz = QuizItem[]; // Our contract: Quiz is an array of QuizItems.
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+// Use a helper for the base URL
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-type TypedSupabaseClient = SupabaseClient<Database>;
+// --- Helper Functions (Now with consistent return types) ---
 
-// 🔹 Helper: fetch or generate note
-async function getNote(supabase: TypedSupabaseClient, params: ContentRequestParams) {
-  const { data: existing } = await supabase
+async function getNote(supabase: any, params: ContentRequestParams): Promise<Note | null> {
+  const { data: existingNote } = await supabase
     .from("notes")
-    .select("content")
+    .select("*") // Select all columns to get the full object
     .eq("topic_id", params.topicId)
     .maybeSingle();
 
-  if (existing?.content) return existing.content;
+  // ✅ FIX 2: On a cache hit, return the ENTIRE note object, not just the content.
+  if (existingNote) {
+    return existingNote;
+  }
 
+  // --- Generation Logic ---
   const generationPayload = {
     grade: `Grade ${params.gradeId}`,
     term: params.termName,
     subject: params.subjectName,
     topic: params.topicTitle,
   };
-
   const res = await fetch(new URL("/api/generate-note", baseUrl).toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(generationPayload),
   });
-
   if (!res.ok) throw new Error("Failed to generate note.");
-  const { note } = await res.json();
+  const { note: noteContent } = await res.json();
 
-  await supabase.from("notes").insert({
-    content: note,
-    topic_id: params.topicId,
-    term_id: params.termId,
-    grade_id: params.gradeId,
-    subject_id: params.subjectId,
-  });
+  const { data: newNote, error: insertError } = await supabase
+    .from("notes")
+    .insert({
+      content: noteContent,
+      topic_id: params.topicId,
+      term_id: params.termId,
+      grade_id: params.gradeId,
+      subject_id: params.subjectId,
+    })
+    .select() // Return the newly created row
+    .single();
 
-  return note;
+  if (insertError) throw insertError;
+  return newNote;
 }
 
-// 🔹 Helper: fetch or generate quiz
-async function getQuiz(supabase: TypedSupabaseClient, params: ContentRequestParams) {
+async function getQuiz(supabase: any, params: ContentRequestParams): Promise<Quiz | null> {
   const { data: existing } = await supabase
     .from("quizzes")
     .select("content")
     .eq("topic_id", params.topicId)
     .maybeSingle();
 
-  // ✅ HARDENING: Validate the cached data.
-  // If `content` exists AND it is a valid array, return it.
-  if (existing?.content && Array.isArray(existing.content)) {
-    console.log(`[API] Quiz Cache HIT and is valid for topicId: ${params.topicId}`);
+  if (existing?.content) {
+    console.log('existing content from DB:', existing.content )
     return existing.content;
   }
-
-  // If we reach here, it's a cache miss OR the cached data is invalid.
-  // We will proceed to generate a new quiz.
-  console.log(`[API] Quiz Cache MISS or invalid data for topicId: ${params.topicId}. Regenerating...`);
-
-
-  if (existing?.content) return existing.content;
-
+  
+  // --- Generation Logic ---
   const generationPayload = {
     grade: `Grade ${params.gradeId}`,
     term: params.termName,
     subject: params.subjectName,
     topic: params.topicTitle,
   };
-
   const res = await fetch(new URL("/api/generate-quizz", baseUrl).toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(generationPayload),
   });
-
   if (!res.ok) throw new Error("Failed to generate quiz.");
-  const { quiz } = await res.json();
+  const responseData = await res.json();
+console.log('responseData after fetch in topic-contet', responseData)
+  const quizArray = responseData.quiz;
+console.log('quiz array extracted from responseData', quizArray)
+  if (!Array.isArray(quizArray)) {
+    console.error("Data received from generate-quizz API is not in the expected format:", responseData);
+    throw new Error("Generated quiz data is malformed.");
+  }
 
-  await supabase.from("quizzes").insert({
-    content: quiz,
+  // Use upsert to be safe and return the new content
+  const { data: newQuiz, error: upsertError } = await supabase.from("quizzes").upsert({
+    content: quizArray,
     topic_id: params.topicId,
     term_id: params.termId,
     grade_id: params.gradeId,
     subject_id: params.subjectId,
-  });
+  }).select('content').single();
 
-  return quiz;
+  if (upsertError) throw upsertError;
+  return newQuiz?.content ?? null;
 }
 
-// 🔹 Main POST handler
+// --- Main POST handler ---
 export async function POST(request: Request) {
+  // ✅ FIX 1: Use the correct, purpose-built client for API Routes.
   const supabase = await createClient();
 
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
     const validation = contentRequestSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json(
-        { error: "Invalid request", details: validation.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid request", details: validation.error}, { status: 400 });
     }
 
     const params = validation.data;
@@ -140,28 +143,19 @@ export async function POST(request: Request) {
       quiz: quizResult.status === "fulfilled" ? quizResult.value : null,
     };
 
-    if (noteResult.status === "rejected")
-      console.error("Note generation failed:", noteResult.reason);
-    if (quizResult.status === "rejected")
-      console.error("Quiz generation failed:", quizResult.reason);
-
+console.log('responseData after calling getQuiz', responseData.quiz)
 
     return NextResponse.json(responseData);
   } catch (error) {
-   
+    // Your existing robust catch block is good.
     let errorMessage = "An unexpected error occurred.";
-    const statusCode = 500;
-
-    // Check if it's an object with a 'message' property (like a standard Error)
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-
     console.error("[API /topic-content] Error:", errorMessage);
-
     return NextResponse.json(
-      { error: "Failed to generate note", details: errorMessage },
-      { status: statusCode }
+      { error: "Failed to process content request", details: errorMessage },
+      { status: 500 }
     );
   }
 }
