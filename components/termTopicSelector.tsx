@@ -12,6 +12,7 @@ import { RotateCw } from "lucide-react";
 import { Volume2, Pause, Rewind, FastForward } from 'lucide-react';
 import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 import VideoGenerator from "./video-generator";
+import { Eye, EyeOff } from "lucide-react"; // lucide-react icons
 
 
 
@@ -123,7 +124,10 @@ export default function TermSelection({
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState<number | null>(null);
+
+//state for making note and quiz visible
   const [isQuizVisible, setIsQuizVisible] = useState(false);
+  const [showNote, setShowNote] = useState(true);
 
   // Progress state
   const [savingProgress, setSavingProgress] = useState(false);
@@ -367,67 +371,86 @@ export default function TermSelection({
 
             {/* Note Card */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="flex items-center gap-2"><BookOpen /> Notes</div>
+  <CardHeader>
+    <CardTitle className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <BookOpen /> Notes
+      </div>
 
-                  {supported && noteText && !isLoading && (
-                    <div className="flex items-center gap-1">
-                      {/* ✅ Rewind Button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={rewind}
-                        disabled={!canSeek}
-                        aria-label="Rewind to previous sentence"
-                      >
-                        <Rewind />
-                      </Button>
+      <div className="flex items-center gap-1">
+        {/* ✅ Eye/EyeOff Toggle Icon */}
+        {noteText && !isLoading && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowNote((prev) => !prev)}
+            aria-label={showNote ? "Hide note" : "Show note"}
+          >
+            {showNote ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </Button>
+        )}
 
-                      {/* Play/Pause/Resume Button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleToggleSpeech}
-                        aria-label={label}
-                      >
-                        <Icon />
-                      </Button>
+        {/* ✅ Rewind Button */}
+        {supported && noteText && !isLoading && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={rewind}
+              disabled={!canSeek}
+              aria-label="Rewind to previous sentence"
+            >
+              <Rewind />
+            </Button>
 
-                      {/* ✅ Fast Forward Button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={fastForward}
-                        disabled={!canSeek}
-                        aria-label="Fast forward to next sentence"
-                      >
-                        <FastForward />
-                      </Button>
+            {/* Play/Pause/Resume Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleToggleSpeech}
+              aria-label={label}
+            >
+              <Icon />
+            </Button>
 
-                      {/* Stop Button */}
-                      {canSeek && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={cancel}
-                          aria-label="Stop and reset"
-                        >
-                          Stop
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading && <p>Loading content...</p>}
-                {error && <p className="text-red-500">Error: {error.message}</p>}
-                {data && !noteText && <p>Note could not be loaded for this topic Refresh page.</p>}
-                {noteText && <div className="whitespace-pre-wrap">{noteText}</div>}
-              </CardContent>
-            </Card>
+            {/* ✅ Fast Forward Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fastForward}
+              disabled={!canSeek}
+              aria-label="Fast forward to next sentence"
+            >
+              <FastForward />
+            </Button>
 
+            {/* Stop Button */}
+            {canSeek && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={cancel}
+                aria-label="Stop and reset"
+              >
+                Stop
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+    </CardTitle>
+  </CardHeader>
+
+  <CardContent>
+    {isLoading && <p>Loading content...</p>}
+    {error && <p className="text-red-500">Error: {error.message}</p>}
+    {data && !noteText && <p>Note could not be loaded for this topic. Refresh page.</p>}
+
+    {noteText && showNote && (
+      <div className="whitespace-pre-wrap mt-4">{noteText}</div>
+    )}
+  </CardContent>
+</Card>
             {/* Video Card */}
             <Card>
               <CardHeader>
