@@ -533,16 +533,17 @@ export default function TermSelection({
 
                         {/* Score summary */}
                         {submitted && score !== null && (
-                          <div>
+
                           <p className="font-bold mt-4">
                             Your Score: {score}/{displayableQuiz.length}
                           </p>
-                          
-                          <Button onClick={handleRetakeQuiz} className="ml-2">
-                          Retake Quiz
-                        </Button>
-                        </div>
+                        )}
+                        {submitted && score && (
 
+
+                          <Button onClick={handleRetakeQuiz} className="ml-2">
+                            Retake Quiz
+                          </Button>
                         )}
 
 
