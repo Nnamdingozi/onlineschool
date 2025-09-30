@@ -304,6 +304,14 @@ export default function TermSelection({
     setSubmitted(true);
   };
 
+
+  const handleRetakeQuiz = () => {
+    setAnswers({});
+    setSubmitted(false);
+    setScore(null);
+    setIsQuizVisible(false);
+  };
+
   return (
     <div className="flex h-full flex-col md:flex-row bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-200 dark:from-[#1f1c2c] dark:via-[#928dab] dark:to-[#1f1c2c] rounded-sm">
       {/* Sidebar */}
@@ -444,86 +452,100 @@ export default function TermSelection({
               </CardHeader>
               <CardContent>
 
-                {isLoading && <p>Loading content...</p>}
-                {error && (
-                  <div className="text-center">
-                    <p className="text-red-500 mb-4">{error.message}</p>
-                    <Button onClick={() => mutate()}>
-                      <RotateCw className="mr-2 h-4 w-4" /> Retry
-                    </Button>
-                  </div>
-                )}
-                {!isLoading && !error && !displayableQuiz && <p>A quiz could not be loaded for this topic.</p>}
 
+                {/* video card */}
+                <Card className="cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="h-5 w-5" /> Quiz
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoading && <p>Loading content...</p>}
 
-                {displayableQuiz && !isQuizVisible && (
-                  <Button onClick={() => setIsQuizVisible(true)}>Start Quiz</Button>
-                )}
+                    {error && (
+                      <div className="text-center">
+                        <p className="text-red-500 mb-4">{error.message}</p>
+                        <Button onClick={() => mutate()}>
+                          <RotateCw className="mr-2 h-4 w-4" /> Retry
+                        </Button>
+                      </div>
+                    )}
 
-                {/* quizz display */}
-                {displayableQuiz && isQuizVisible ? (
-                  <div className="space-y-6">
-                    {displayableQuiz.map((q, i) => (
-                      <div key={i} className="border p-3 rounded">
-                        <p className="font-semibold mb-2">
-                          {i + 1}. {q.question}
-                        </p>
+                    {!isLoading && !error && !displayableQuiz && (
+                      <p className="text-red-500">
+                        Quiz data is not available for this topic. Please try again or contact support.
+                      </p>
+                    )}
 
-                        <div className="space-y-1">
-                          {q.options.map((opt, j) => (
-                            <label key={j} className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name={`question-${i}`}
-                                value={opt}
-                                disabled={submitted}
-                                checked={answers[i] === opt}
-                                onChange={() => handleOptionChange(i, opt)}
-                              />
-                              <span>{opt}</span>
-                            </label>
-                          ))}
-                        </div>
+                    {displayableQuiz && !isQuizVisible && (
+                      <Button onClick={() => setIsQuizVisible(true)}>Start Quiz</Button>
+                    )}
 
-                        {/* After submit → show feedback */}
-                        {submitted && (
-                          <div className="mt-2">
-                            {answers[i] === q.answer ? (
-                              <p className="text-green-600">✅ Correct!</p>
-                            ) : (
-                              <div>
-                                <p className="text-red-600">❌ Incorrect.</p>
-                                <p className="text-green-700">✔ Correct Answer: {q.answer}</p>
+                    {displayableQuiz && isQuizVisible && (
+                      <div className="space-y-6">
+                        {displayableQuiz.map((q, i) => (
+                          <div key={i} className="border p-3 rounded">
+                            <p className="font-semibold mb-2">
+                              {i + 1}. {q.question}
+                            </p>
+                            <div className="space-y-1">
+                              {q.options.map((opt, j) => (
+                                <label key={j} className="flex items-center gap-2">
+                                  <input
+                                    type="radio"
+                                    name={`question-${i}`}
+                                    value={opt}
+                                    disabled={submitted}
+                                    checked={answers[i] === opt}
+                                    onChange={() => handleOptionChange(i, opt)}
+                                  />
+                                  <span>{opt}</span>
+                                </label>
+                              ))}
+                            </div>
+
+                            {/* After submit → show feedback */}
+                            {submitted && (
+                              <div className="mt-2">
+                                {answers[i] === q.answer ? (
+                                  <p className="text-green-600">✅ Correct!</p>
+                                ) : (
+                                  <div>
+                                    <p className="text-red-600">❌ Incorrect.</p>
+                                    <p className="text-green-700">✔ Correct Answer: {q.answer}</p>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
+                        ))}
+
+                        {/* Submit button */}
+                        {!submitted && (
+                          <Button
+                            onClick={handleSubmitQuiz}
+                            disabled={Object.keys(answers).length !== displayableQuiz.length}
+                          >
+                            Submit Quiz
+                          </Button>
                         )}
+
+                        {/* Score summary */}
+                        {submitted && score !== null && (
+                          <p className="font-bold mt-4">
+                            Your Score: {score}/{displayableQuiz.length}
+                          </p>
+
+
+                        )}
+
+
                       </div>
-                    ))}
-
-                    {/* Submit button */}
-                    {!submitted && (
-                      <Button
-                        onClick={handleSubmitQuiz}
-                        disabled={Object.keys(answers).length !== displayableQuiz.length}
-                      >
-                        Submit Quiz
-                      </Button>
                     )}
+                  </CardContent>
+                </Card>
 
-                    {/* Score summary */}
-                    {submitted && score !== null && (
-                      <p className="font-bold mt-4">
-                        Your Score: {score}/{displayableQuiz.length}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-red-500">
-                    Quiz data is available but cannot be displayed now. . Please try again or
-                    contact support.
-                  </p>
-                )}
 
               </CardContent>
             </Card>
