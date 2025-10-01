@@ -187,11 +187,13 @@ import { ElevenLabsClient } from 'elevenlabs';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegStatic from 'ffmpeg-static';
 import ffprobeStatic from 'ffprobe-static';
+import ffprobePath from "ffprobe-static";
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { Readable } from 'stream';
 import fetch from 'node-fetch';
+import { spawn } from "child_process";
 
 // --- Configuration ---
 const elevenlabs = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY! });
@@ -337,15 +339,34 @@ export async function generateVideoFromNote(noteText: string, subjectName: strin
 }
 
 // --- Helper ---
-function getAudioDuration(filePath: string): Promise<number> {
-  console.log(`   [FFPROBE] Probing audio duration for: ${filePath}`);
+
+export async function getAudioDuration(filePath: string): Promise<number> {
+  console.log(`[FFPROBE] Checking duration for: ${filePath}`);
+
   return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(filePath, (err, metadata) => {
-      if (err) {
-        console.error(`   [FFPROBE] ERROR:`, err);
-        return reject(err);
+    const probe = spawn(ffprobePath.path, [
+      "-v", "error",
+      "-show_entries", "format=duration",
+      "-of", "default=noprint_wrappers=1:nokey=1",
+      filePath,
+    ]);
+
+    let output = "";
+    probe.stdout.on("data", (chunk) => {
+      output += chunk;
+    });
+
+    probe.stderr.on("data", (err) => {
+      console.error("[FFPROBE STDERR]:", err.toString());
+    });
+
+    probe.on("close", (code) => {
+      if (code === 0) {
+        const duration = parseFloat(output.trim());
+        resolve(isNaN(duration) ? 0 : duration);
+      } else {
+        reject(new Error(`FFPROBE failed with code ${code}`));
       }
-      resolve(metadata.format.duration || 0);
     });
   });
 }
