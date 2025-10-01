@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 
 const ai = new GoogleGenAI({
-  apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY!,
+  apiKey: process.env.GEMINI_API_KEY!,
 });
 
 // ✅ Mapping of Grades → Nigerian School Levels
