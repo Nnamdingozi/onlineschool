@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server"; // Import the async factor
 import { NextResponse } from "next/server";
 import { generateVideoFromNote } from "@/lib/ai/videoAgentClip";
 import { z } from 'zod';
-
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
@@ -14,6 +13,7 @@ const videoRequestSchema = z.object({
   noteText: z.string(),
   subjectName: z.string(),
 });
+
 
 export async function POST(request: Request) {
   console.log("\n--- [API /note-video] INCOMING REQUEST ---");

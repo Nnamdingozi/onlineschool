@@ -10,7 +10,6 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-
 // Zod schema for validation
 const eligibilityRequestSchema = z.object({
   noteText: z.string().min(50, { message: "Note text is too short to analyze." }),
